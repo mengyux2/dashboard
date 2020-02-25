@@ -114,8 +114,9 @@ imo_list_100 = [9082063,
  9718179,
  9316191]
 
-app = dash.Dash()
-
+#app = dash.Dash()
+app = dash.Dash(__name__)
+server = app.server
 colors = {
     'background': '#111111',
     'text': '#000000'
