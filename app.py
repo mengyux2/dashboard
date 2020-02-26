@@ -11,8 +11,9 @@ import plotly.express as px
 
 df_2week = pd.read_csv('owner_test.csv')
 df_1week = pd.read_csv("owner_test_1week.csv")
+df_2and1week = pd.read_csv("owner_test_2week.csv")
 
-color_list = px.colors.qualitative.G10
+color_list = px.colors.qualitative.Dark24
 imo_list_100 = [9082063,
  8316601,
  9286243,
@@ -137,11 +138,17 @@ def generate_table(dataframe, max_rows=1000000):
 
 app.layout = html.Div([
     html.H1(
-        children='Vessel Owner Score Plot 2 week data(left) and 1 week data(right)',
+        children='Vessel Owner Score Plots',
         style={
             'textAlign': 'left',
             'color': colors['text']}
     ),
+
+    html.Div(children='''
+        plot1: weekly call using 1 week data. \b
+        plot2: biweekly call using 2 weeks data. \b
+        plot3: weekly call using 2 weeks data. \b
+    '''),
 
     html.Div([
         dcc.Dropdown(
@@ -160,7 +167,7 @@ app.layout = html.Div([
         dcc.Graph(
             id='graph_1week',
 
-            style={'width':'600','height':'500'}
+            style={'width':'550','height':'450'}
         ),
         style={'display':'inline-block'}
     ),
@@ -169,7 +176,16 @@ app.layout = html.Div([
         dcc.Graph(
             id='graph_2week',
 
-            style={'width':'600','height':'500'}
+            style={'width':'550','height':'450'}
+        ),
+        style={'display':'inline-block'}
+    ),
+
+    html.Div(
+        dcc.Graph(
+            id='graph_2and1week',
+
+            style={'width':'550','height':'450'}
         ),
         style={'display':'inline-block'}
     ),
@@ -178,6 +194,17 @@ app.layout = html.Div([
     ],
 style={'width': '100%', 'display': 'inline-block'}
 )
+
+def match_color(df_2week,df_1week,df_2and1week,value):
+    color_list = px.colors.qualitative.Dark24+px.colors.qualitative.Light24
+    color_map = {}
+    data_2week = df_2week[df_2week['imo'] == value]
+    data_1week = df_1week[df_1week['imo'] == value]
+    data_2and1week = df_2and1week[df_2and1week['imo'] == value]
+    email_list = list(set(data_2week.email.unique().tolist()+data_1week.email.unique().tolist()+data_2and1week.email.unique().tolist()))
+    for idx,email in enumerate(email_list):
+        color_map[email] = color_list[idx]
+    return color_map
 
 
 #callback to update graph
@@ -189,6 +216,7 @@ style={'width': '100%', 'display': 'inline-block'}
 def update_graph_2week(value):
     data = df_2week[df_2week['imo'] ==value]
     traces = []
+    color_map = match_color(df_2week,df_1week,df_2and1week,value)
     for idx, i in enumerate(data.email.unique()):
         df_by_email = data[data['email'] == i]
         traces.append(dict(
@@ -199,7 +227,7 @@ def update_graph_2week(value):
             opacity=0.7,
             marker={
                 'size': 15,
-                'color': color_list[idx],
+                'color': color_map[i],
                 'line': {'width': 0.3, 'color': 'white'}
             },
             name=i
@@ -228,6 +256,7 @@ def update_graph_2week(value):
 def update_graph_1week(value):
     data = df_1week[df_1week['imo'] ==value]
     traces = []
+    color_map = match_color(df_2week,df_1week,df_2and1week,value)
     for idx, i in enumerate(data.email.unique()):
         df_by_email = data[data['email'] == i]
         traces.append(dict(
@@ -238,7 +267,7 @@ def update_graph_1week(value):
             opacity=0.7,
             marker={
                 'size': 15,
-                'color': color_list[idx],
+                'color': color_map[i],
                 'line': {'width': 0.3, 'color': 'white'}
             },
             name=i
@@ -257,6 +286,45 @@ def update_graph_1week(value):
         )
             }
     
+#callback to update graph
+@app.callback(
+    Output(component_id='graph_2and1week', component_property='figure'), 
+    #[Input('dropdown1', 'value')]
+    [Input(component_id='dropdown1',component_property='value')]
+)
+
+def update_graph_2and1week(value):
+    data = df_2and1week[df_2and1week['imo'] ==value]
+    traces = []
+    color_map = match_color(df_2week,df_1week,df_2and1week,value)
+    for idx, i in enumerate(data.email.unique()):
+        df_by_email = data[data['email'] == i]
+        traces.append(dict(
+            x=df_by_email['creation_date'].values.tolist(),
+            y=df_by_email['score'].values.tolist(),
+            text=df_by_email['email'],
+            mode='markers',
+            opacity=0.7,
+            marker={
+                'size': 15,
+                'color': color_map[i],
+                'line': {'width': 0.3, 'color': 'white'}
+            },
+            name=i
+        ))
+
+    return {
+        'data': traces,
+        'layout': dict(
+            xaxis={'type': 'datetime', 'title': 'email creation date'
+                   },
+            yaxis={'title': 'TFIDF score', 'range': [0, 1.3]},
+            margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
+            legend={'x': 0, 'y': 1},
+            hovermode='closest',
+            transition = {'duration': 500},
+        )
+            }
 
 
 if __name__ == '__main__':
