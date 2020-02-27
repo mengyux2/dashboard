@@ -16,7 +16,8 @@ df_2and1week = pd.read_csv("owner_test_2week.csv")
 #color_list = px.colors.qualitative.Dark24
 
 fileName = 'common_imo_list.txt'
-imo_list_300 = [int(line.rstrip('\n')) for line in open(fileName)]
+good_pattern_fileName = 'common_imo_list_pattern.txt'
+imo_list_300 = [int(line.rstrip('\n')) for line in open(good_pattern_fileName)]
 
 #app = dash.Dash()
 app = dash.Dash(__name__)
