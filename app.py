@@ -9,13 +9,13 @@ import plotly.graph_objs as go
 import plotly.express as px
 
 
-df_2week = pd.read_csv('owner_test.csv')
+df_2week = pd.read_csv('owner_test_current.csv')
 df_1week = pd.read_csv("owner_test_1week.csv")
 df_2and1week = pd.read_csv("owner_test_2week.csv")
 
 #color_list = px.colors.qualitative.Dark24
 
-fileName = 'asia_imo_list.txt'
+fileName = 'asia_imo_list_2.txt'
 good_pattern_fileName = 'common_imo_list_pattern.txt'
 imo_list_300 = [int(line.rstrip('\n')) for line in open(fileName)]
 
