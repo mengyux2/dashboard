@@ -54,7 +54,7 @@ munch==2.5.0
 mysql-connector-python-rf==2.2.2
 nbconvert==5.6.0
 nbformat==4.4.0
-notebook==6.0.1
+notebook==6.4.1
 numpy==1.17.4
 pandas==0.25.3
 pandocfilters==1.4.2
